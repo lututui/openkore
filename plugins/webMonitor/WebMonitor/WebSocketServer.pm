@@ -16,7 +16,7 @@ package WebMonitor::WebSocketServer;
 
 use strict;
 use base qw(Base::WebSocketServer);
-use JSON;
+use JSON::Tiny qw(encode_json);
 
 use Globals qw($char $field);
 
