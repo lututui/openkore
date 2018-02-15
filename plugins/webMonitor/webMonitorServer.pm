@@ -46,8 +46,11 @@ use Base::WebServer;
 use base qw(Base::WebServer);
 use Utils qw(getFormattedDateShort);
 use Globals qw(%consoleColors $field $messageSender @venderListsID);
-use Log qw(message);
+use Log qw(message debug warning);
+use Field;
+use List::MoreUtils;
 
+use WebMonitor::Pages::Index;
 
 BEGIN {
 	eval {
@@ -69,6 +72,20 @@ BEGIN {
 }
 
 my $time = getFormattedDateShort(time, 1);
+our @pageList = qw(WebMonitor::Pages::Index);
+my %fileRequests = 
+	(
+		'/css/bootstrap.min.css'				=>	1,
+		'/css/webMonitor.css'					=>	1,
+		'/img/glyphicons-halflings.png'			=>	1,
+		'/img/favicon.png'						=>	1,
+		'/img/glyphicons-halflings-white.png'	=>	1,
+		'/js/bootstrap.min.js'					=>	1,
+		'/js/bootstrap-2.0.2.js'				=>	1,
+		'/js/jquery.min.js'						=>	1,
+		'/js/webMonitor.js'						=>	1,
+		'default'								=>	0,
+	);
 ###
 # cHook
 #
@@ -191,51 +208,64 @@ sub request {
 	# resources that was sent
 	my %resources = %{$process->{GET}};
 	
-	# TODO: sanitize $filename for possible exploits (like ../../config.txt)
 	my $filename = $process->file;
 
-	# map / to /index.html
-	$filename .= 'index.html' if ($filename =~ /\/$/);
+	# map / to /index
+	$filename .= 'index' if ($filename =~ /\/$/);
 	# alias the newbie maps to new_zone01
 	$filename =~ s/new_.../new_zone01/;
 
 	my $csrf_pass = $resources{csrf} eq $csrf;
+
+	debug "[webMonitorServer] received request for " . $filename . "\n";
 	
+	# Deal with action requests
 	if ($filename eq '/handler') {
 		$self->checkCSRF($process) or return;
 		handle(\%resources, $process);
-		return;
-	}
 
-	if ($filename =~ m{^/map/(\w+)$} and my $image = Field->new(name => $1)->image('png, jpg')) {
-		$process->header('Content-Type' => contentType($image));
-		sendFile($process, $image);
-
-	} else {
-		# Figure out the content-type of the file and send a header to the
-		# client containing that information. Well-behaved clients should
-		# respect this header.
+	# Deal with map image requests
+	} elsif ($filename =~ /^\/map\/(\w+)$/) {
+		my $field = Field->new(name => "$1");
+		my $image = $field->image('png, jpg');
+		$process->header('Content-Type', contentType($image));
+		if (sendFile($process, $image)) {
+			debug "[webMonitorServer] Requested image " . $image . " sent successfully\n";
+		} else {
+			warning "[webMonitorServer] Requested image " . $image . " could not be sent\n";
+		}
+	# Deal with allowed file requests
+	} elsif ($fileRequests{$filename} || $fileRequests{default}) {
 		$process->header("Content-Type", contentType($filename));
-
-		my $file = new template($webMonitorPlugin::path . '/WWW/' . $filename . '.template');
-
-		# The file requested has an associated template. Do a replacement.
-		if ($file->{template}) {
-			$process->header('Content-Type' => 'text/html');
-			$process->status(404 => 'Not Found');
-			$content .= "<h1>Not Found</h1>";
-			$process->shortResponse($content);
 
 		# See if the file being requested exists in the file system. This is
 		# useful for static stuff like style sheets and graphics.
-		} elsif (sendFile($process, $webMonitorPlugin::path . '/WWW/' . $filename)) {
-
+		my $fullFilename = $webMonitorPlugin::path . '/WWW/' . $filename;
+		if (sendFile($process, $fullFilename)) {
+			debug "[webMonitorServer] Requested file " . $fullFilename . " sent successfully\n";
 		} else {
-			# our custom 404 message
-			$process->header('Content-Type' => 'text/html');
-			$process->status(404 => 'Not Found');
-			$content .= "<h1>Not Found</h1>";
-			$process->shortResponse($content);
+			warning "[webMonitorServer] Requested file " . $fullFilename . " could not be sent\n";
+		}
+	} else {
+		my $packageIndex = List::MoreUtils::first_index { $_->getURL eq $filename } @pageList;
+
+		# Deal with page requests
+		if ($packageIndex != -1) {
+			$process->header("Content-Type", "text/html");
+			$process->print($pageList[$packageIndex]->new($csrf, $time)->build);
+		} else {
+			$process->header('Content-Type', 'text/html');
+
+			# Deal with forbidden file requests
+			if (-e $filename) {
+				$process->status(403, 'Forbidden');
+				$process->shortResponse("<h1>Forbidden</h1>");
+
+			# Deal with unknown requests
+			} else {
+				$process->status(404, 'Not Found');
+				$process->shortResponse("<h1>Not Found</h1>");
+			}
 		}
 	}
 }
