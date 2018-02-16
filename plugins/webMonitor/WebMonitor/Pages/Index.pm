@@ -7,13 +7,6 @@ use base qw(WebMonitor::BasePage);
 use Utils qw(formatNumber);
 use Globals qw($char);
 
-sub new {
-    my ($class) = shift;
-    my $self = $class->SUPER::new(shift, shift);
-
-    return $self;
-}
-
 sub getURL {
 	return "/index";
 }
@@ -299,8 +292,8 @@ sub getContent {
 	$char->{def}, $char->{def_bonus}, $char->{def_magic}, $char->{def_magic_bonus}, $char->{flee}, $char->{flee_bonus},
 	$char->{attack_speed}, $char->{exp}, $char->{exp_max}, $char->exp_base_percent, $char->exp_base_percent,
 	$char->{exp_job}, $char->{exp_job_max}, $char->exp_job_percent, $char->exp_job_percent, $char->{weight},
-	$char->{weight_max}, $char->weight_percent,
-	$char->weight_percent, formatNumber($char->{zeny}), $char->statusesString, $self->getSidebar);
+	$char->{weight_max}, $char->weight_percent,	$char->weight_percent, formatNumber($char->{zeny}), 
+	$char->statusesString, $self->getSidebar);
 }
 
 1;

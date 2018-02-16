@@ -46,11 +46,12 @@ use Base::WebServer;
 use base qw(Base::WebServer);
 use Utils qw(getFormattedDateShort);
 use Globals qw(%consoleColors $field $messageSender @venderListsID);
-use Log qw(message debug warning);
+use Log qw(message debug warning error);
 use Field;
 use List::MoreUtils;
 
 use WebMonitor::Pages::Index;
+use WebMonitor::Pages::Inventory;
 
 BEGIN {
 	eval {
@@ -72,7 +73,7 @@ BEGIN {
 }
 
 my $time = getFormattedDateShort(time, 1);
-our @pageList = qw(WebMonitor::Pages::Index);
+our @pageList = qw(WebMonitor::Pages::Index WebMonitor::Pages::Inventory);
 my %fileRequests = 
 	(
 		'/css/bootstrap.min.css'				=>	1,
@@ -85,6 +86,10 @@ my %fileRequests =
 		'/js/jquery.min.js'						=>	1,
 		'/js/webMonitor.js'						=>	1,
 		'default'								=>	0,
+	);
+my @allowedConsoleCommands =
+	(
+		'st add', 'is', 'eq', 'uneq', 'drop', 'cart get'
 	);
 ###
 # cHook
@@ -289,8 +294,14 @@ sub handle {
 	my $retval;
 
 	if ($resources->{command}) {
-		message "New command received via web: $resources->{command}\n";
-		Commands::run($resources->{command});
+		# Sanitize command received from web
+		if ($resources->{command} !~ /;;/ || 
+				List::MoreUtils::any { $resources->{command} =~ /^$_/} @allowedConsoleCommands) {
+			message "New command received via web: $resources->{command}\n";
+			Commands::run($resources->{command});
+		} else {
+			error "Received unallowed command via web: $resources->{command}\n";
+		}
 	}
 
 	if ($resources->{x} && $resources->{y}) {
