@@ -53,6 +53,7 @@ use List::MoreUtils;
 use WebMonitor::Pages::Index;
 use WebMonitor::Pages::Inventory;
 use WebMonitor::Pages::Report;
+use WebMonitor::Pages::Config;
 
 BEGIN {
 	eval {
@@ -74,7 +75,8 @@ BEGIN {
 }
 
 my $time = getFormattedDateShort(time, 1);
-our @pageList = qw(WebMonitor::Pages::Index WebMonitor::Pages::Inventory WebMonitor::Pages::Report);
+our @pageList = qw(WebMonitor::Pages::Index WebMonitor::Pages::Inventory WebMonitor::Pages::Report
+	WebMonitor::Pages::Config);
 my %fileRequests = 
 	(
 		'/css/bootstrap.min.css'				=>	1,
@@ -90,7 +92,7 @@ my %fileRequests =
 	);
 my @allowedConsoleCommands =
 	(
-		'st add', 'is', 'eq', 'uneq', 'drop', 'cart get', 'exp reset'
+		'st add', 'is', 'eq', 'uneq', 'drop', 'cart get', 'exp reset', 'conf', 'timeout', 'reload'
 	);
 ###
 # cHook
@@ -299,6 +301,11 @@ sub handle {
 		if ($resources->{command} !~ /;;/ || 
 				List::MoreUtils::any { $resources->{command} =~ /^$_/} @allowedConsoleCommands) {
 			message "New command received via web: $resources->{command}\n";
+			if ($resources->{command} =~ /^reload/) {
+				# Deal with windows files using \ as a path separator, 
+				# which is the escape character and affects Settings::loadByRegex
+				$resources->{command} =~ s/\\/\\\\/;
+			}
 			Commands::run($resources->{command});
 		} else {
 			error "Received unallowed command via web: $resources->{command}\n";
