@@ -52,6 +52,7 @@ use List::MoreUtils;
 
 use WebMonitor::Pages::Index;
 use WebMonitor::Pages::Inventory;
+use WebMonitor::Pages::Report;
 
 BEGIN {
 	eval {
@@ -73,7 +74,7 @@ BEGIN {
 }
 
 my $time = getFormattedDateShort(time, 1);
-our @pageList = qw(WebMonitor::Pages::Index WebMonitor::Pages::Inventory);
+our @pageList = qw(WebMonitor::Pages::Index WebMonitor::Pages::Inventory WebMonitor::Pages::Report);
 my %fileRequests = 
 	(
 		'/css/bootstrap.min.css'				=>	1,
@@ -89,7 +90,7 @@ my %fileRequests =
 	);
 my @allowedConsoleCommands =
 	(
-		'st add', 'is', 'eq', 'uneq', 'drop', 'cart get'
+		'st add', 'is', 'eq', 'uneq', 'drop', 'cart get', 'exp reset'
 	);
 ###
 # cHook
@@ -237,7 +238,7 @@ sub request {
 		if (sendFile($process, $image)) {
 			debug "[webMonitorServer] Requested image " . $image . " sent successfully\n";
 		} else {
-			warning "[webMonitorServer] Requested image " . $image . " could not be sent\n";
+			debug "[webMonitorServer] Requested image " . $image . " could not be sent\n";
 		}
 	# Deal with allowed file requests
 	} elsif ($fileRequests{$filename} || $fileRequests{default}) {
@@ -249,7 +250,7 @@ sub request {
 		if (sendFile($process, $fullFilename)) {
 			debug "[webMonitorServer] Requested file " . $fullFilename . " sent successfully\n";
 		} else {
-			warning "[webMonitorServer] Requested file " . $fullFilename . " could not be sent\n";
+			debug "[webMonitorServer] Requested file " . $fullFilename . " could not be sent\n";
 		}
 	} else {
 		my $packageIndex = List::MoreUtils::first_index { $_->getURL eq $filename } @pageList;
