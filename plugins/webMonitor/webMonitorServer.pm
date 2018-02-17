@@ -54,6 +54,7 @@ use WebMonitor::Pages::Index;
 use WebMonitor::Pages::Inventory;
 use WebMonitor::Pages::Report;
 use WebMonitor::Pages::Config;
+use WebMonitor::Pages::Console;
 
 BEGIN {
 	eval {
@@ -76,7 +77,7 @@ BEGIN {
 
 my $time = getFormattedDateShort(time, 1);
 our @pageList = qw(WebMonitor::Pages::Index WebMonitor::Pages::Inventory WebMonitor::Pages::Report
-	WebMonitor::Pages::Config);
+	WebMonitor::Pages::Config WebMonitor::Pages::Console);
 my %fileRequests = 
 	(
 		'/css/bootstrap.min.css'				=>	1,
@@ -100,7 +101,7 @@ my @consoleCommandsBlacklist =
 # This sub hooks into the Log module of OpenKore in order to store console
 # messages into a FIFO array @messages. Many thanks to PlayingSafe, from whom
 # most of the code was derived from.
-my @messages;
+our @messages;
 my $cHook = Log::addHook(\&cHook, "Console Log");
 my $hookShopList = Plugins::addHook('packet_vender_store', \&hookShopList);
 our $shopNumber;
@@ -143,30 +144,44 @@ sub cHook {
 	}
 }
 
-sub messageClass {
-	my ($type, $domain) = @_;
-	return unless $type =~ /^\w+$/ && $domain =~ /^\w+$/;
-	$domain = 'default' unless $consoleColors{$type}{$domain};
-	'msg_' . $type . '_' . $domain
+sub getConsoleColors {
+	my $css;
+
+	foreach my $type (keys %consoleColors) {
+		foreach my $domain (keys %{$consoleColors{$type}}) {
+			next unless $type =~ /^\w+$/ && $domain =~ /^\w+$/;
+			$css .= ".msg_" . $type . "_" . $domain . " { color: " . $consoleColors{$type}{$domain} . "; }\n";
+		}
+	}
+
+	return $css;
 }
 
 sub consoleLogHTML {
 	my @parts;
 
 	if (defined &HTML::Entities::encode) {
-		foreach (@messages) {
-			my $domain = $consoleColors{$_->{type}}{$_->{domain}} ? $_->{domain} : 'default';
-			my $class = messageClass($_->{type}, $_->{domain});
-			
+		foreach my $msg (@messages) {
+			my $domain = $consoleColors{$msg->{type}}{$msg->{domain}} ? $msg->{domain} : 'default';
+			my $class = messageClass($msg->{type}, $msg->{domain});
 			$class = ' class="' . $class . '"' if $class;
-			push @parts, '<span' . $class . '>' . encode_entities($_->{message}) . '</span>';
+
+			push @parts, '<span' . $class . '>' . encode_entities($msg->{message}) . '</span>';
 		}
 
 		push @parts, '<noscript><span class="msg_web">Reload to get new messages.</span></noscript>';
+
 		return "@parts";
 	}
-	
+
 	return '<span class="msg_web"><a href="http://search.cpan.org/perldoc?HTML::Entities">HTML::Entities</a> is required to display console log.' . "\n" . '</span>';
+}
+
+sub messageClass {
+	my ($type, $domain) = @_;
+	return unless $type =~ /^\w+$/ && $domain =~ /^\w+$/;
+	$domain = 'default' unless $consoleColors{$type}{$domain};
+	'msg_' . $type . '_' . $domain
 }
 
 # TODO merge with chist command somehow, new API?
@@ -241,6 +256,7 @@ sub request {
 			debug "[webMonitorServer] Requested image " . $image . " sent successfully\n";
 		} else {
 			debug "[webMonitorServer] Requested image " . $image . " could not be sent\n";
+			$process->status(500, 'Internal Server Error');
 		}
 	# Deal with allowed file requests
 	} elsif ($fileRequests{$filename} || $fileRequests{default}) {
@@ -253,6 +269,7 @@ sub request {
 			debug "[webMonitorServer] Requested file " . $fullFilename . " sent successfully\n";
 		} else {
 			debug "[webMonitorServer] Requested file " . $fullFilename . " could not be sent\n";
+			$process->status(500, 'Internal Server Error');
 		}
 	} else {
 		my $packageIndex = List::MoreUtils::first_index { $_->getURL eq $filename } @pageList;
@@ -332,7 +349,7 @@ sub handle {
 	# make sure this is the last resource to be checked
 	if ($resources->{page}) {
 		my $filename = $resources->{page};
-		$filename .= 'index.html' if ($filename =~ /\/$/);
+		$filename .= 'index' if ($filename =~ /\/$/);
 
 		# hooray for standards-compliance
  		$process->header('Location', $filename);

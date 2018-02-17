@@ -2,7 +2,7 @@ package WebMonitor::BasePage;
 
 use strict;
 
-use Globals qw(%config %consoleColors $char $field);
+use Globals qw(%config $char $field);
 use Settings qw(%sys);
 
 sub new {
@@ -19,7 +19,9 @@ sub new {
 
 sub getURL {}
 sub getName {}
-sub getIcon {}
+sub getIcon {
+	return "icon-chevron-right";
+}
 
 sub build {
 	my ($self) = @_;
@@ -71,7 +73,7 @@ sub buildHeader {
 		<script src=\"http://html5shim.googlecode.com/svn/trunk/html5.js\"></script>
 	<![endif]-->
 	",
-	$char->name, $char->{lv}, $char->{lv_job}, $Settings::NAME, $self->getConsoleColors, $self->getSocketPort);
+	$char->name, $char->{lv}, $char->{lv_job}, $Settings::NAME, &webMonitorServer::getConsoleColors, $self->getSocketPort);
 }
 
 sub buildBody {
@@ -111,20 +113,6 @@ sub buildBody {
 	",
 	$Settings::NAME, $char->name, $char->{lv}, $char->{lv_job}, $config{username}, $self->{time}, $self->{csrf},
 	$self->getMenu, $self->getContent, $self->getFooter);
-}
-
-sub getConsoleColors {
-	my ($self) = @_;
-	my $css;
-
-	foreach my $type (keys %consoleColors) {
-		foreach my $domain (keys %{$consoleColors{$type}}) {
-			next unless $type =~ /^\w+$/ && $domain =~ /^\w+$/;
-			$css .= ".msg_" . $type . "_" . $domain . " { color: " . $consoleColors{$type}{$domain} . "; }\n";
-		}
-	}
-
-	return $css;
 }
 
 sub getSocketPort {
@@ -174,7 +162,7 @@ sub getSidebar {
 		</p>
 		
 		<script type=\"text/javascript\">
-			$(function(){
+			\$(function(){
 				var \$map = \$(\"#map\");
 				
 				\$map.on(\"click\", function(){
@@ -203,7 +191,7 @@ sub getSidebar {
 				function draw() {
 					clearMap();
 					
-					drawPoints();
+					//drawPoints();
 					drawPlayer();
 				}
 				
