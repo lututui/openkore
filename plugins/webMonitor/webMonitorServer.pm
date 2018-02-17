@@ -90,9 +90,9 @@ my %fileRequests =
 		'/js/webMonitor.js'						=>	1,
 		'default'								=>	0,
 	);
-my @allowedConsoleCommands =
-	(
-		'st add', 'is', 'eq', 'uneq', 'drop', 'cart get', 'exp reset', 'conf', 'timeout', 'reload'
+my @consoleCommandsBlacklist =
+	qw(
+		eval
 	);
 ###
 # cHook
@@ -298,17 +298,20 @@ sub handle {
 
 	if ($resources->{command}) {
 		# Sanitize command received from web
-		if ($resources->{command} !~ /;;/ || 
-				List::MoreUtils::any { $resources->{command} =~ /^$_/} @allowedConsoleCommands) {
-			message "New command received via web: $resources->{command}\n";
-			if ($resources->{command} =~ /^reload/) {
-				# Deal with windows files using \ as a path separator, 
-				# which is the escape character and affects Settings::loadByRegex
-				$resources->{command} =~ s/\\/\\\\/;
-			}
-			Commands::run($resources->{command});
+		if (index($resources->{command}, ";;") != -1) {
+			error "Sublines are not allowed in web context: $resources->{command}\n";
 		} else {
-			error "Received unallowed command via web: $resources->{command}\n";
+			unless (List::MoreUtils::any { $resources->{command} =~ /^$_/ } @consoleCommandsBlacklist) {
+				message "New command received via web: $resources->{command}\n";
+				if ($resources->{command} =~ /^reload/) {
+					# Deal with windows files using \ as a path separator, 
+					# which is the escape character and affects Settings::loadByRegex
+					$resources->{command} =~ s/\\/\\\\/;
+				}
+				Commands::run($resources->{command});
+			} else {
+				error "Received blacklisted command via web: $resources->{command}\n";
+			}
 		}
 	}
 
