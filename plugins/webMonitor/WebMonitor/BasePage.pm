@@ -326,9 +326,9 @@ sub getInputAppend {
 				last;
 			}
 		}
-	}
 
-	@options = sort { $a->{value} cmp $b->{value} } @options;
+		@options = sort { $a->{value} cmp $b->{value} } @options;
+	}
 
 	for (my $i = 0; $i < scalar @options; ++$i) {
 		if ($i == 0) {

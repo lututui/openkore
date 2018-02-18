@@ -56,6 +56,7 @@ use WebMonitor::Pages::Report;
 use WebMonitor::Pages::Config;
 use WebMonitor::Pages::Console;
 use WebMonitor::Pages::Chat;
+use WebMonitor::Pages::Guild;
 
 BEGIN {
 	eval {
@@ -78,7 +79,7 @@ BEGIN {
 
 my $time = getFormattedDateShort(time, 1);
 our @pageList = qw(WebMonitor::Pages::Index WebMonitor::Pages::Inventory WebMonitor::Pages::Report
-	WebMonitor::Pages::Config WebMonitor::Pages::Console WebMonitor::Pages::Chat);
+	WebMonitor::Pages::Config WebMonitor::Pages::Console WebMonitor::Pages::Chat WebMonitor::Pages::Guild);
 my %fileRequests = 
 	(
 		'/css/bootstrap.min.css'				=>	1,
