@@ -277,4 +277,80 @@ sub getMapURL {
 	return $result;
 }
 
+sub submitConsoleCommandJS {
+	my ($self) = @_;
+
+	return sprintf(
+	"
+	<script type=\"application/javascript\" defer=\"defer\">
+		function sendConsoleCommand() {
+			var ic = document.getElementById(\"input_command\");
+			var sc = document.getElementById(\"selection_command\");
+			window.location.href = '../handler?csrf=%s&command=' + sc.options[sc.selectedIndex].value + ic.value;
+			ic.value = '';
+            return false;
+		}
+
+		function submit() {
+			if (window.event)
+                if (window.event.keyCode == 13)
+                    sendConsoleCommand();
+			return false;
+		}
+    </script>
+	",
+	$self->{csrf});
+}
+
+sub getInputAppend {
+	my ($self, $selected) = @_;
+	my $returnString =
+	"
+	<div class=\"input-append\" rel=\"tooltip\">
+		<select class=\"span2\" id=\"selection_command\">
+	";
+
+	my @options = (
+		{ name => 'Chat', 		command => "c", 		value => 0 },
+		{ name => 'Party', 		command => "p", 		value => 1 },
+		{ name => 'Guild', 		command => "g", 		value => 2 },
+		{ name => 'Console', 	command => undef, 		value => 3 },
+	);
+
+	if ($selected) {
+		my ($holdValue, $holdI);
+		for (my $i = 0; $i < scalar @options; ++$i) {
+			if ($selected eq $options[$i]->{name}) {
+				$options[0]->{value} = $options[$i]->{value};
+				$options[$i]->{value} = 0;
+				last;
+			}
+		}
+	}
+
+	@options = sort { $a->{value} cmp $b->{value} } @options;
+
+	for (my $i = 0; $i < scalar @options; ++$i) {
+		if ($i == 0) {
+			$returnString .= sprintf("<option selected value=\"%s \">%s</option>\n", $options[$i]->{command}, $options[$i]->{name});
+		} else {
+			$returnString .= sprintf(
+			"
+			<option value=\"%s \">%s</option>
+			", $options[$i]->{command}, $options[$i]->{name});
+		}
+	}
+
+	$returnString .= 
+	"
+	</select>
+
+	<input class=\"span9\" id=\"input_command\" type=\"text\" onKeyPress=\"submit()\">
+	<input type=\"button\" class=\"btn span2\" id=\"button_send\" value=\"Send\" disabled onClick=\"sendConsoleCommand()\"/>
+	</div>
+	";
+
+	return $returnString;
+}
+
 1;
