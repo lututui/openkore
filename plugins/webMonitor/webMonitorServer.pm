@@ -57,6 +57,7 @@ use WebMonitor::Pages::Config;
 use WebMonitor::Pages::Console;
 use WebMonitor::Pages::Chat;
 use WebMonitor::Pages::Guild;
+use WebMonitor::Pages::Shop;
 
 BEGIN {
 	eval {
@@ -79,7 +80,8 @@ BEGIN {
 
 my $time = getFormattedDateShort(time, 1);
 our @pageList = qw(WebMonitor::Pages::Index WebMonitor::Pages::Inventory WebMonitor::Pages::Report
-	WebMonitor::Pages::Config WebMonitor::Pages::Console WebMonitor::Pages::Chat WebMonitor::Pages::Guild);
+	WebMonitor::Pages::Config WebMonitor::Pages::Console WebMonitor::Pages::Chat WebMonitor::Pages::Guild
+	WebMonitor::Pages::Shop);
 my %fileRequests = 
 	(
 		'/css/bootstrap.min.css'				=>	1,
@@ -194,29 +196,28 @@ sub loadTextToHTML {
 	
 	my $bw = eval { File::ReadBackwards->new($file) };
 	
-	if ($@) {
+	if ($@ or not defined $bw) {
 		if ($@ =~ 'perhaps you forgot to load "File::ReadBackwards"' || $@ =~ 'Can\'t locate object method "new" via package "File::ReadBackwards"') {
 			return '<span class="msg_web"><a href="http://search.cpan.org/perldoc?File::ReadBackwards">File::ReadBackwards</a> is required to retrieve chat log.' . "\n" . '</span>'
-		} else {
-			return '<span class="msg_error_default">Error while retrieving file \'' . $file . "\n" . encode_entities($@) . '</span>'
 		}
+		return '<span class="msg_error_default">Error while retrieving file \'' . $file . "\n" . encode_entities($@) . '</span>'
 	}
 
 	if (defined &HTML::Entities::encode) {
 		push @parts, '<noscript><span class="msg_web">Load $file:</span></noscript>';
-		
+			
 		while (defined(my $line = $bw->readline)) {
 			push @parts, encode_entities($line);
 			# TODO: make the message size configurable
 			last if @parts > 20;
 		}
-		
+			
 		@parts = reverse @parts;
 		push @parts, '<noscript><span class="msg_web">Reload to get new messages.</span></noscript>';
 
 		return "@parts";
 	}
-	
+		
 	return '<span class="msg_web"><a href="http://search.cpan.org/perldoc?HTML::Entities">HTML::Entities</a> is required to display chat log.' . "\n" . '</span>';
 }
 

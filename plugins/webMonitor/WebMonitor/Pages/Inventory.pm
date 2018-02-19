@@ -144,7 +144,7 @@ sub getCart {
             $returnString .= sprintf(
             "
             <tr>
-                <td><img src=\"https://www.ragnaplace.com/bro/item/%s.png\"/></td>
+                <td><img src=\"https://www.ragnaplace.com/bro/item/%d.png\"/></td>
                 <td>%d</td>
                 <td class=\"left\"><a href=\"http://ratemyserver.net/index.php?page=item_db&item_id=%s\">%s</a></td>
                 <td><a class=\"btn btn-mini btn-inverse\" href=\"javascript:useInventoryCommand('cart+get', '%d+1')\">Get 1</a></td>
@@ -179,7 +179,7 @@ sub getInventory {
             $returnString .= sprintf(
             "
             <tr>
-                <td><img src=\"https://www.ragnaplace.com/bro/item/%s.png\"/></td>
+                <td><img src=\"https://www.ragnaplace.com/bro/item/%d.png\"/></td>
                 <td>%d</td>
                 <td><a href=\"http://ratemyserver.net/index.php?page=item_db&item_id=%s\">%s</a></td>
             ", $item->{nameID}, $item->{amount}, $item->{nameID}, $item->name);
