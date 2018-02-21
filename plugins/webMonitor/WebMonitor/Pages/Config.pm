@@ -61,13 +61,13 @@ sub getContent {
                 return false;
             }
 
-			function submitConfig() {
+			function submitConfig(e) {
 				if (window.event)
 				    if (window.event.keyCode == 13)
                         sendTimeoutCommand();
 			}
 
-            function submitTimeout() {
+            function submitTimeout(e) {
 				if (window.event)
 				    if (window.event.keyCode == 13)
                         sendConfigCommand();
@@ -87,7 +87,7 @@ sub getContent {
             <div class=\"tab-pane active\" id=\"config\">
             <div class=\"span8 well\">
                 %s
-                <input class=\"span7\" id=\"configValue\" type=\"text\" placeholder=\"value\" onKeyPress=\"submitConfig()\">
+                <input class=\"span7\" id=\"configValue\" type=\"text\" placeholder=\"value\" onKeyPress=\"submitConfig(this.event)\">
                 <button class=\"btn\" type=\"button\" onClick=\"sendConfigCommand()\">Change</button>
             </div>
             </div>
@@ -95,7 +95,7 @@ sub getContent {
             <div class=\"tab-pane\" id=\"timeouts\">
             <div class=\"span8 well\">
                 %s
-                <input class=\"span7\" id=\"timeoutValue\" type=\"text\" placeholder=\"value\" onKeyPress=\"submitTimeout()\">
+                <input class=\"span7\" id=\"timeoutValue\" type=\"text\" placeholder=\"value\" onKeyPress=\"submitTimeout(this.event)\">
                 <button class=\"btn\" type=\"button\" onClick=\"sendTimeoutCommand()\">Change</button>
             </div>
             </div>

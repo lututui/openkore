@@ -6,6 +6,7 @@ use WebMonitor::BasePage;
 use base qw(WebMonitor::BasePage);
 use Globals qw($shopstarted $char %shop @venderListsID %venderLists $venderItemList @articles);
 use Settings;
+use Utils qw(formatNumber);
 
 sub getURL {
 	return "/shop";
@@ -29,8 +30,7 @@ sub getContent {
     <script type=\"application/javascript\" defer=\"defer\">
         function exibir() {
             window.location.href = '../handler?csrf=%s&shop=' + lista_loja.options[lista_loja.selectedIndex].value;
-            return false;
-		}
+	    }
     </script>
 
     <div class=\"span9\">
@@ -50,7 +50,7 @@ sub getContent {
                     <option selected value=\"\">Choose a shop to view</option>
                     %s
                 </select>
-                <input class=\"span7\" id=\"text_command\" size=\"16\" type=\"text\" onKeyPress=\"submit()\">&nbsp;<button class=\"btn btn-small\" type=\"button\" value=\"Send command\" onClick=\"sendConsoleCommand()\">Send</button><br>
+                <input class=\"span7\" id=\"text_command\" size=\"16\" type=\"text\" onKeyPress=\"submit(this.event)\">&nbsp;<button class=\"btn btn-small\" type=\"button\" value=\"Send command\" onClick=\"sendConsoleCommand()\">Send</button><br>
                 <table class=\"table table-hover\">
                     <thead>
                     <tr>
@@ -152,11 +152,11 @@ sub getBuyButton {
     my ($self, $i) = @_;
 
     if ($venderItemList->[$i]->{price} <= $char->{zeny}) {
-        return sprintf("<a class=\"btn btn-mini btn-success\" href=\"/handler?csrf=%s&command=buy+%d+,+%d)\">Buy</a>",
+        return sprintf("<a class=\"btn btn-mini btn-success\" href=\"/handler?csrf=%s&command=vender+%d+%d)\">Buy 1</a>",
             $self->{csrf}, $webMonitorServer::shopNumber, $i);
     }
 
-    return "<a class=\"btn btn-mini btn-danger\" rel=\"tooltip\" title=\"Not enough zeny\">Buy</button>";
+    return "<a class=\"btn btn-mini btn-danger\" rel=\"tooltip\" title=\"Not enough zeny\">Buy 1</button>";
 }
 
 sub getSelfShopContent {

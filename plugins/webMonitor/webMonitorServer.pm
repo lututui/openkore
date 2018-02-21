@@ -58,6 +58,7 @@ use WebMonitor::Pages::Console;
 use WebMonitor::Pages::Chat;
 use WebMonitor::Pages::Guild;
 use WebMonitor::Pages::Shop;
+use WebMonitor::Pages::NPC;
 
 BEGIN {
 	eval {
@@ -79,9 +80,17 @@ BEGIN {
 }
 
 my $time = getFormattedDateShort(time, 1);
-our @pageList = qw(WebMonitor::Pages::Index WebMonitor::Pages::Inventory WebMonitor::Pages::Report
-	WebMonitor::Pages::Config WebMonitor::Pages::Console WebMonitor::Pages::Chat WebMonitor::Pages::Guild
-	WebMonitor::Pages::Shop);
+our @pageList = qw(
+	WebMonitor::Pages::Index 
+	WebMonitor::Pages::Inventory 
+	WebMonitor::Pages::Report
+	WebMonitor::Pages::Config 
+	WebMonitor::Pages::Console 
+	WebMonitor::Pages::Chat 
+	WebMonitor::Pages::Guild
+	WebMonitor::Pages::Shop
+	WebMonitor::Pages::NPC);
+
 my %fileRequests = 
 	(
 		'/css/bootstrap.min.css'				=>	1,
@@ -107,7 +116,6 @@ my @consoleCommandsBlacklist =
 # most of the code was derived from.
 our @messages;
 my $cHook = Log::addHook(\&cHook, "Console Log");
-my $hookShopList = Plugins::addHook('packet_vender_store', \&hookShopList);
 our $shopNumber;
 
 # CSRF prevention token

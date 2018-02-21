@@ -288,14 +288,12 @@ sub submitConsoleCommandJS {
 			var sc = document.getElementById(\"selection_command\");
 			window.location.href = '../handler?csrf=%s&command=' + sc.options[sc.selectedIndex].value + ic.value;
 			ic.value = '';
-            return false;
 		}
 
-		function submit() {
+		function submit(e) {
 			if (window.event)
                 if (window.event.keyCode == 13)
                     sendConsoleCommand();
-			return false;
 		}
     </script>
 	",
@@ -345,7 +343,7 @@ sub getInputAppend {
 	"
 	</select>
 
-	<input class=\"span9\" id=\"input_command\" type=\"text\" onKeyPress=\"submit()\">
+	<input class=\"span9\" id=\"input_command\" type=\"text\" onKeyPress=\"submit(this.event)\">
 	<input type=\"button\" class=\"btn span2\" id=\"button_send\" value=\"Send\" disabled onClick=\"sendConsoleCommand()\"/>
 	</div>
 	";
