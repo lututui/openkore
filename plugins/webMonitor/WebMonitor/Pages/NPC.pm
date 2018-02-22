@@ -30,7 +30,7 @@ sub getContent {
             var ic = document.getElementById(\"input_command\");
             var sc = document.getElementById(\"selection_command\");
             ic.value = command;
-            sc.value = \"\";
+            sc.value = '';
             ic.focus();
         }
     </script>

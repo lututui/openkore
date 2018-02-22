@@ -351,4 +351,25 @@ sub getInputAppend {
 	return $returnString;
 }
 
+sub getSkillUseButton {
+    my ($self, $skill) = @_;
+    my $type = $skill->getTargetType();
+
+    return "<a class=\"btn btn-mini disabled\">Passive</a>" if ($type == Skill::TARGET_PASSIVE);
+    
+    my $baseString = "<a class=\"btn btn-mini\" href=\"/handler?csrf=%s&command=%s+%d%s\">%s</a>";
+
+    if ($type == Skill::TARGET_SELF) {
+        return sprintf($baseString, $self->{csrf}, "ss", $skill->getIDN, undef, "Use on Self");
+    } elsif ($type == Skill::TARGET_ENEMY) {
+        return sprintf($baseString, $self->{csrf}, "sm", $skill->getIDN, "+0", "Use on Enemy");
+    } elsif ($type == Skill::TARGET_ACTORS) {
+        return sprintf($baseString, $self->{csrf}, "sp", $skill->getIDN, "+0", "Use on Actor");
+    } elsif ($type == Skill::TARGET_LOCATION) {
+        return sprintf($baseString, $self->{csrf}, "sl", $skill->getIDN, undef, "Use on Location");
+    }
+
+    return undef;
+}
+
 1;

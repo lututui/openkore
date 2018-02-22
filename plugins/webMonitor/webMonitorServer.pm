@@ -59,6 +59,8 @@ use WebMonitor::Pages::Chat;
 use WebMonitor::Pages::Guild;
 use WebMonitor::Pages::Shop;
 use WebMonitor::Pages::NPC;
+use WebMonitor::Pages::Skill;
+use WebMonitor::Pages::Homunculus;
 
 BEGIN {
 	eval {
@@ -89,7 +91,9 @@ our @pageList = qw(
 	WebMonitor::Pages::Chat 
 	WebMonitor::Pages::Guild
 	WebMonitor::Pages::Shop
-	WebMonitor::Pages::NPC);
+	WebMonitor::Pages::NPC
+	WebMonitor::Pages::Skill
+	WebMonitor::Pages::Homunculus);
 
 my %fileRequests = 
 	(
