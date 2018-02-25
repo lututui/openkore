@@ -372,4 +372,43 @@ sub getSkillUseButton {
     return undef;
 }
 
+sub getInventory {
+    my ($self, $subType) = @_;
+    my ($condition, $returnString);
+
+    if ($subType == 0) {
+        $condition = sub { $_[0]->{type} <= 2 };
+    } elsif ($subType == 1) {
+        $condition = sub { !$_[0]->{equipped} && ($_[0]->{type} == 3 || $_[0]->{type} == 6 || $_[0]->{type} == 10) };
+    } elsif ($subType == 2) {
+        $condition = sub { $_[0]->{equipped} };
+    } elsif ($subType == 3) {
+        $condition = sub { !$_[0]->{equipped} && $_[0]->{type} > 2 && $_[0]->{type} != 3 && $_[0]->{type} != 6 
+            && $_[0]->{type} != 10 };
+    } elsif ($subType == 4) {
+		$condition = sub { $_[0]->{equipped} || (!$_[0]->{equipped} && $_[0]->{type} > 2 && $_[0]->{type} != 3 
+			&& $_[0]->{type} != 6 && $_[0]->{type} != 10) };
+	} else {
+        $condition = sub { 1 };
+    }
+
+    foreach my $item (@{$self->inventoryList}) {
+        if ($condition->($item)) {
+            $returnString .= sprintf(
+            "
+            <tr>
+                <td><img src=\"https://www.ragnaplace.com/bro/item/%d.png\"/></td>
+                <td>%d</td>
+                <td><a href=\"http://ratemyserver.net/index.php?page=item_db&item_id=%s\">%s</a></td>
+            ", $item->{nameID}, $item->{amount}, $item->{nameID}, $item->name);
+
+            $returnString .= $self->getItemCommandButton($item, $subType);
+            
+            $returnString .= "</tr>";
+        }
+    }
+
+    return $returnString;
+}
+
 1;

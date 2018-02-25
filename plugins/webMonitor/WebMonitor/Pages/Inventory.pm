@@ -157,56 +157,29 @@ sub getCart {
     return $returnString;
 }
 
-sub getInventory {
-    my ($self, $subType) = @_;
-    my ($condition, $returnString);
+sub getItemCommandButton {
+    my ($self, $item, $subType) = @_;
+    my $returnString;
 
-    if ($subType == 0) {
-        $condition = sub { $_[0]->{type} <= 2 };
-    } elsif ($subType == 1) {
-        $condition = sub { !$_[0]->{equipped} && ($_[0]->{type} == 3 || $_[0]->{type} == 6 || $_[0]->{type} == 10) };
-    } elsif ($subType == 2) {
-        $condition = sub { $_[0]->{equipped} };
-    } elsif ($subType == 3) {
-        $condition = sub { !$_[0]->{equipped} && $_[0]->{type} > 2 && $_[0]->{type} != 3 && $_[0]->{type} != 6 
-            && $_[0]->{type} != 10 };
-    } else {
-        $condition = sub { 1 };
+    my $baseString = 
+    "<td>
+        <a class=\"btn btn-mini %s\" href=\"javascript:useInventoryCommand('%s', '%d%s')\">%s</a>
+    </td>";
+            
+    if ($subType != 1) {
+        if ($subType == 0) {
+            $returnString .= sprintf($baseString, "btn-success", "is", $item->{binID}, undef, "Use on Self");
+        } elsif ($subType == 2) {
+            $returnString .= sprintf($baseString, "btn-inverse", "eq", $item->{binID}, undef, "Equip");
+        } elsif ($subType == 3) {
+            $returnString .= sprintf($baseString, "btn-inverse", "uneq", $item->{binID}, undef, "Unequip");
+        }
     }
 
-    foreach my $item (@{$char->inventory->getItems}) {
-        if ($condition->($item)) {
-            $returnString .= sprintf(
-            "
-            <tr>
-                <td><img src=\"https://www.ragnaplace.com/bro/item/%d.png\"/></td>
-                <td>%d</td>
-                <td><a href=\"http://ratemyserver.net/index.php?page=item_db&item_id=%s\">%s</a></td>
-            ", $item->{nameID}, $item->{amount}, $item->{nameID}, $item->name);
-
-            my $baseString = 
-            "<td>
-                <a class=\"btn btn-mini %s\" href=\"javascript:useInventoryCommand('%s', '%d%s')\">%s</a>
-            </td>";
-            
-            if ($subType != 1) {
-                if ($subType == 0) {
-                    $returnString .= sprintf($baseString, "btn-success", "is", $item->{binID}, undef, "Use on Self");
-                } elsif ($subType == 2) {
-                    $returnString .= sprintf($baseString, "btn-inverse", "eq", $item->{binID}, undef, "Equip");
-                } elsif ($subType == 3) {
-                    $returnString .= sprintf($baseString, "btn-inverse", "uneq", $item->{binID}, undef, "Unequip");
-                }
-            }
-
-            if ($subType != 2) {
-                $returnString .= sprintf($baseString, "btn-danger", "drop", $item->{binID}, "+1", "Drop 1");
-                if ($subType != 3) {
-                    $returnString .= sprintf($baseString, "btn-danger", "drop", $item->{binID}, undef, "Drop Stack");
-                }
-            }
-            
-            $returnString .= "</tr>";
+    if ($subType != 2) {
+        $returnString .= sprintf($baseString, "btn-danger", "drop", $item->{binID}, "+1", "Drop 1");
+        if ($subType != 3) {
+            $returnString .= sprintf($baseString, "btn-danger", "drop", $item->{binID}, undef, "Drop Stack");
         }
     }
 
@@ -215,6 +188,10 @@ sub getInventory {
 
 sub cartActive {
     return 'disabled' unless $char->cart->isReady;
+}
+
+sub inventoryList {
+    return $char->inventory->getItems;
 }
 
 1;

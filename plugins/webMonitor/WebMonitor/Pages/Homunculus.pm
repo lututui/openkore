@@ -178,13 +178,6 @@ sub getContent {
                                 <span class=\"value_homunculos_attack_magic_min\">%s</span>
                             </td>
                         </tr>
-
-                        <tr>
-                            <td class=\"left\">Faith</td>
-                            <td class=\"pull-right\">
-                                <span class=\"value_homunculos_hit\">%s</span>
-                            </td>
-                        </tr>
                     </tbody>
                     </table>
                 </div>
@@ -245,7 +238,7 @@ sub getContent {
     $char->{homunculus}{hunger}, $char->{homunculus}{hunger}, $char->{homunculus}{hunger}, $char->{homunculus}{atk},
     $char->{homunculus}{matk}, $char->{homunculus}{attack_speed}, $char->{homunculus}{hit},
     $char->{homunculus}{critical}, $char->{homunculus}{def}, $char->{homunculus}{mdef}, $char->{homunculus}{flee},
-    $char->{homunculus}{intimacy}, $char->{homunculus}{accessory}, $char->{homunculus}{faith},
+    $char->{homunculus}{intimacy}, $char->{homunculus}{accessory},
     $self->getHomunSkillList, $char->{homunculus}{points_skill}, &webMonitorServer::consoleLogHTML);
 }
 
