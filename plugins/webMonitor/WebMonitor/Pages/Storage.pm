@@ -5,6 +5,7 @@ use strict;
 use WebMonitor::BasePage;
 use base qw(WebMonitor::BasePage);
 use Globals qw($char);
+use Settings;
 
 sub getURL {
 	return "/storage";
@@ -25,7 +26,7 @@ sub getContent {
     "
     <script type=\"application/javascript\" defer=\"defer\">
 		function storageGetCommand(args) {
-			window.location.href = '../handler?csrf=%s&command=storage+get+' + args + '&page=storage';
+			window.location.href = '../handler?csrf=%s&command=storage+get+' + args;
 			return false;
 		}
 	</script>

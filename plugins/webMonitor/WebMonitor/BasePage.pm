@@ -5,6 +5,10 @@ use strict;
 use Globals qw(%config $char $field);
 use Settings qw(%sys);
 
+##
+# BasePage BasePage->new(Integer csrf, String time)
+# 
+# Takes csrf-protection integer and current time and creates a new instance of BasePage
 sub new {
 	my ($class) = shift;
 	my $self = {
@@ -17,12 +21,32 @@ sub new {
 	return $self;
 }
 
+##
+# abstract static String BasePage->getURL
+#
+# Returns the url for this page
+# Must be overriden
 sub getURL {}
+
+##
+# abstract static String BasePage->getURL
+#
+# Returns the name for this page
+# Must be overriden
 sub getName {}
+
+##
+# abstract static String BasePage->getURL
+#
+# Returns the url for this page
 sub getIcon {
 	return "icon-chevron-right";
 }
 
+##
+# String BasePage->build
+#
+# Returns a valid HTML page
 sub build {
 	my ($self) = @_;
 	
@@ -41,6 +65,10 @@ sub build {
 	$sys{locale}, $self->buildHeader, $self->buildBody);
 }
 
+##
+# String BasePage->buildHeader
+#
+# Returns a valid HTML <head> tag content, which is NOT wrapped by the <head> tag
 sub buildHeader {
 	my ($self) = @_;
 
@@ -73,9 +101,14 @@ sub buildHeader {
 		<script src=\"http://html5shim.googlecode.com/svn/trunk/html5.js\"></script>
 	<![endif]-->
 	",
-	$char->name, $char->{lv}, $char->{lv_job}, $Settings::NAME, &webMonitorServer::getConsoleColors, $self->getSocketPort);
+	$char->name, $char->{lv}, $char->{lv_job}, $Settings::NAME, &webMonitorServer::getConsoleColors,
+	$self->getSocketPort);
 }
 
+##
+# String BasePage->buildBody
+#
+# Returns a valid HTML <body> tag content, which is NOT wrapped by the <body> tag
 sub buildBody {
 	my ($self) = @_;
 
@@ -115,12 +148,18 @@ sub buildBody {
 	$self->getMenu, $self->getContent, $self->getFooter);
 }
 
+##
+# static BasePage->getSocketPort
+#
+# Returns the port used by this plugin
 sub getSocketPort {
-	my ($self) = @_;
-
 	return int($webMonitorPlugin::socketServer && $webMonitorPlugin::socketServer->getPort);
 }
 
+##
+# String BasePage->getMenu
+#
+# Returns a sidebar navigation menu, containing links to all other pages
 sub getMenu {
 	my ($self) = @_;
 	my $returnString = "<li class=\"nav-header\">Menu</li>";
@@ -134,6 +173,10 @@ sub getMenu {
 	return $returnString;
 }
 
+##
+# String BasePage->getSidebar
+#
+# Return the default sidebar
 sub getSidebar {
 	my ($self) = @_;
 
@@ -190,8 +233,6 @@ sub getSidebar {
 				
 				function draw() {
 					clearMap();
-					
-					//drawPoints();
 					drawPlayer();
 				}
 				
@@ -240,14 +281,6 @@ sub getSidebar {
 					
 					drawPoint(x, y, \"#FF0000\");
 				}
-				
-				// function drawPoints() {
-					// var data = [[178, 370], [222, 24], [26, 318], [362, 263], [362, 73], [77, 366]];
-					// 
-					// data.forEach(function(v, k){
-						// drawPoint(v[0], v[1], \"#FFFF00\", v[0] + \", \" + v[1]);
-					// });
-				// }
 			});
 		</script>
 	</div>
@@ -256,9 +289,11 @@ sub getSidebar {
 	$char->position->{y});
 }
 
+##
+# static String BasePage->getFooter
+#
+# Returns the default footer
 sub getFooter {
-	my ($self) = @_;
-
 	return 
 	"
 	<hr>
@@ -269,14 +304,21 @@ sub getFooter {
 	";
 }
 
+##
+# static String BasePage->getMapURL
+#
+# Returns the path for a map file
 sub getMapURL {
-	my ($self) = @_;
 	my $pattern = $config{webMapURL} || '/map/%s';
 	my $result = sprintf($pattern, $field->name);
 
 	return $result;
 }
 
+##
+# String BaseString->submitConsoleCommandJS
+#
+# Returns a javascript script that can submit a console command
 sub submitConsoleCommandJS {
 	my ($self) = @_;
 
@@ -300,8 +342,17 @@ sub submitConsoleCommandJS {
 	$self->{csrf});
 }
 
+##
+# static String BaseString->getInputAppend(String selected)
+#
+# Returns the input-append div class content
+# 'selected' is the default-selected option and can be one of the following strings:
+#    -> 'Chat'
+#    -> 'Party'
+#    -> 'Guild'
+#    -> 'Console'
 sub getInputAppend {
-	my ($self, $selected) = @_;
+	my ($selected) = @_;
 	my $returnString =
 	"
 	<div class=\"input-append\" rel=\"tooltip\">
@@ -351,6 +402,10 @@ sub getInputAppend {
 	return $returnString;
 }
 
+##
+# String BasePage->getSkillUseButton(Skill skill)
+#
+# Returns an use button for the given skill
 sub getSkillUseButton {
     my ($self, $skill) = @_;
     my $type = $skill->getTargetType();

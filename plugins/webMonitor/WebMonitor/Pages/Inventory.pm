@@ -25,7 +25,7 @@ sub getContent {
     "
     <script type=\"application/javascript\" defer=\"defer\">
 		function useInventoryCommand(command, args) {
-			window.location.href = '../handler?csrf=%s&command='+ command + '+' + args + '&page=inventory';
+			window.location.href = '../handler?csrf=%s&command='+ command + '+' + args;
 			return false;
 		}
 	</script>
